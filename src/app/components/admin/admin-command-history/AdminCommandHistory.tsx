@@ -238,7 +238,7 @@ export function AdminCommandHistory() {
 
                 <div className="px-4 py-3 border-t border-[#00ffaa]/8 flex justify-between">
                     <span className="text-[#8899aa] text-xs">
-                        {filtered.length} / {history.length} bản ghi
+                        Hiển thị {filtered.length}/{history.length} bản ghi
                     </span>
 
                     <span className="text-[#00ffaa]/50 text-xs">

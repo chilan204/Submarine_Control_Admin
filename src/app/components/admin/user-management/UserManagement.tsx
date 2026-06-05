@@ -207,7 +207,7 @@ export function UserManagement() {
           )}
         </div>
         <div className="px-4 py-3 border-t border-[#00ffaa]/8 text-[#8899aa]" style={{ fontSize: "0.72rem" }}>
-          Hiển thị {filtered.length} trên tổng số {users.length} người dùng
+          Hiển thị {filtered.length}/{users.length} người dùng
         </div>
       </div>
 
