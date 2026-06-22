@@ -42,17 +42,17 @@ export function UserModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>TÊN ĐĂNG NHẬP</label>
-              <input className={inputClass} style={{ fontSize: "0.875rem", fontFamily: "monospace" }} placeholder="user.name" value={form.username} onChange={(e) => set("username", e.target.value)} />
+              <input className={inputClass} style={{ fontSize: "0.875rem", fontFamily: "monospace" }} placeholder="Tên đăng nhập" value={form.username} onChange={(e) => set("username", e.target.value)} />
             </div>
             <div>
               <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>SỐ ĐIỆN THOẠI</label>
-              <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="0901234567" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+              <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="0123456789" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>EMAIL</label>
-              <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="name@nauticom.mil" value={form.email} onChange={(e) => set("email", e.target.value)} />
+              <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="xxx@xxx.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
             </div>
             <div>
               <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>VAI TRÒ</label>

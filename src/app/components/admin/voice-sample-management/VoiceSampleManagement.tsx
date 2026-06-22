@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Trash2, Upload, Mic } from "lucide-react";
+import { toast } from "sonner";
 import { VoiceSampleItem } from "./types";
 import { UploadModal } from "./UploadModal";
 
@@ -17,7 +18,7 @@ export function VoiceSampleManagement() {
 
   const fetchSamples = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch("http://localhost:8080/api/voice-samples", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,7 +54,7 @@ export function VoiceSampleManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch("http://localhost:8080/api/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -81,7 +82,7 @@ export function VoiceSampleManagement() {
 
   const deleteSample = async (userId: string) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch(
         `http://localhost:8080/api/voice-samples/${userId}`,
         {
@@ -89,15 +90,21 @@ export function VoiceSampleManagement() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      if (res.ok) fetchSamples();
+      if (res.ok) {
+        toast.success("Xóa mẫu giọng nói thành công");
+        fetchSamples();
+      } else {
+        toast.error("Xóa mẫu giọng nói thất bại");
+      }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
   const handleUpload = async (userId: string, file: File) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch(
@@ -109,17 +116,21 @@ export function VoiceSampleManagement() {
         }
       );
       if (res.ok) {
+        toast.success("Tải lên mẫu giọng nói thành công");
         fetchSamples();
         setShowUpload(false);
+      } else {
+        toast.error("Tải lên mẫu giọng nói thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
   const toggleActive = async (userId: string) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch(
         `http://localhost:8080/api/voice-samples/${userId}/toggle-active`,
         {
@@ -127,9 +138,15 @@ export function VoiceSampleManagement() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      if (res.ok) fetchSamples();
+      if (res.ok) {
+        toast.success("Cập nhật trạng thái thành công");
+        fetchSamples();
+      } else {
+        toast.error("Cập nhật trạng thái thất bại");
+      }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 

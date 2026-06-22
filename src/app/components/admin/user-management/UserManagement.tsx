@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { User, UserFormData } from "./types";
 import { ROLE_LABELS, ROLE_COLORS } from "./constants";
 import { initials } from "./utils";
@@ -16,7 +17,7 @@ export function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch("http://localhost:8080/api/user", {
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -49,25 +50,29 @@ export function UserManagement() {
 
   const handleAdd = async (data: UserFormData) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch("http://localhost:8080/api/user", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(data)
       });
       if (res.ok) {
+        toast.success("Thêm người dùng thành công");
         fetchUsers();
         setModal(null);
+      } else {
+        toast.error("Thêm người dùng thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
   const handleEdit = async (data: UserFormData) => {
     if (!selectedUser) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const payload = { ...data };
       if (!payload.password) {
         payload.password = "dummyPassword"; // dummy to pass validation
@@ -79,30 +84,38 @@ export function UserManagement() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
+        toast.success("Cập nhật người dùng thành công");
         fetchUsers();
         setModal(null);
         setSelectedUser(null);
+      } else {
+        toast.error("Cập nhật người dùng thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
   const handleDelete = async () => {
     if (!selectedUser) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch(`http://localhost:8080/api/user/${selectedUser.id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
+        toast.success("Xóa người dùng thành công");
         fetchUsers();
         setModal(null);
         setSelectedUser(null);
+      } else {
+        toast.error("Xóa người dùng thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 

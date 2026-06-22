@@ -24,7 +24,7 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const headers = { "Authorization": `Bearer ${token}` };
 
         const [usersRes, voicesRes, sessionsRes] = await Promise.all([

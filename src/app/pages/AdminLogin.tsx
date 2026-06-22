@@ -40,12 +40,12 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
 
             if (response.ok && data.data?.token) {
                 if (data.data.roleCode === "ADMIN") {
-                    localStorage.setItem(
+                    sessionStorage.setItem(
                         "token",
                         data.data.token
                     );
 
-                    localStorage.setItem(
+                    sessionStorage.setItem(
                         "user",
                         JSON.stringify(data.data)
                     );
@@ -61,10 +61,17 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                 return;
             }
 
-            setError(
-                data.message ||
-                "Tên đăng nhập hoặc mật khẩu không đúng."
-            );
+            const msg = data.message || "";
+            if (
+                msg.toLowerCase().includes("not found") ||
+                msg.toLowerCase().includes("invalid") ||
+                msg.toLowerCase().includes("bad credential") ||
+                msg.toLowerCase().includes("wrong")
+            ) {
+                setError("Tên đăng nhập hoặc mật khẩu không đúng.");
+            } else {
+                setError(msg || "Tên đăng nhập hoặc mật khẩu không đúng.");
+            }
         } catch {
             setError(
                 "Lỗi kết nối mạng. Vui lòng thử lại."
@@ -107,7 +114,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                             fontFamily: "monospace",
                         }}
                     >
-                        HỆ THỐNG ĐIỀU KHIỂN TÀU NGẦM
+                        HỆ THỐNG ĐIỀU KHIỂN AUV
                     </h1>
 
                     <p

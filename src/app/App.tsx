@@ -2,11 +2,12 @@ import { useState } from "react";
 import AdminLogin from "./pages/AdminLogin";
 import AdminLayout from "./pages/AdminLayout";
 import { BackgroundWrapper } from "./components/BackgroundWrapper";
+import { Toaster } from "sonner";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] =
     useState<boolean>(
-      !!localStorage.getItem("token")
+      !!sessionStorage.getItem("token")
     );
 
   const handleLogin = () => {
@@ -14,14 +15,15 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
 
     setIsLoggedIn(false);
   };
 
   return (
     <BackgroundWrapper>
+      <Toaster theme="dark" position="top-right" />
       {isLoggedIn ? (
         <AdminLayout onLogout={handleLogout} />
       ) : (

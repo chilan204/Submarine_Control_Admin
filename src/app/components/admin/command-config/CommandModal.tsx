@@ -33,16 +33,16 @@ export function CommandModal({
                 <div className="space-y-3">
                     <div>
                         <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>TỪ KHÓA</label>
-                        <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="Lặn xuống" value={form.keyword} onChange={(e) => set("keyword", e.target.value)} />
+                        <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="VD: lặn xuống" value={form.keyword} onChange={(e) => set("keyword", e.target.value)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>HÀNH ĐỘNG</label>
-                            <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="dive" value={form.action} onChange={(e) => set("action", e.target.value)} />
+                            <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="VD: DIVE" value={form.action} onChange={(e) => set("action", e.target.value)} />
                         </div>
                         <div>
                             <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>HƯỚNG</label>
-                            <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="down" value={form.direction} onChange={(e) => set("direction", e.target.value)} />
+                            <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="VD: DOWN" value={form.direction} onChange={(e) => set("direction", e.target.value)} />
                         </div>
                     </div>
                     <div className="flex items-center justify-between mt-4">

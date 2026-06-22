@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Role, RoleFormData } from "./types";
 import { RoleModal } from "./RoleModal";
 import { DeleteModal } from "./DeleteModal";
@@ -13,7 +14,7 @@ export function RoleManagement() {
 
   const fetchRoles = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch("http://localhost:8080/api/roles", {
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -38,55 +39,67 @@ export function RoleManagement() {
 
   const handleAdd = async (data: RoleFormData) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch("http://localhost:8080/api/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(data)
       });
       if (res.ok) {
+        toast.success("Thêm vai trò thành công");
         fetchRoles();
         setModal(null);
+      } else {
+        toast.error("Thêm vai trò thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
   const handleEdit = async (data: RoleFormData) => {
     if (!selectedRole) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch(`http://localhost:8080/api/roles/${selectedRole.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(data)
       });
       if (res.ok) {
+        toast.success("Cập nhật vai trò thành công");
         fetchRoles();
         setModal(null);
         setSelectedRole(null);
+      } else {
+        toast.error("Cập nhật vai trò thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 
   const handleDelete = async () => {
     if (!selectedRole) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await fetch(`http://localhost:8080/api/roles/${selectedRole.id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
+        toast.success("Xóa vai trò thành công");
         fetchRoles();
         setModal(null);
         setSelectedRole(null);
+      } else {
+        toast.error("Xóa vai trò thất bại");
       }
     } catch (err) {
       console.error(err);
+      toast.error("Đã xảy ra lỗi");
     }
   };
 

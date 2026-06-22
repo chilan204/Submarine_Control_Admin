@@ -17,7 +17,7 @@ const NAV_ITEMS: { section: Section; label: string; icon: React.ReactNode; badge
 ];
 
 export function Sidebar({ active, onNavigate, onLogout }: SidebarProps) {
-  const userStr = localStorage.getItem("user");
+  const userStr = sessionStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
   const userName = user?.name || "Quản trị viên";
 

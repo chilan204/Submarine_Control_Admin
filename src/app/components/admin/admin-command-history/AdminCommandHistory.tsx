@@ -45,7 +45,7 @@ export function AdminCommandHistory() {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
 
                 const res = await fetch(
                     "http://localhost:8080/api/user-session",
