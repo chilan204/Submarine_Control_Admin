@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu } from "lucide-react";
+import { useBackendStatus } from "../hooks/useBackendStatus";
 
 import { Sidebar } from "../components/admin/Sidebar";
 import { Dashboard } from "../components/admin/dashboard/Dashboard";
@@ -34,6 +35,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ onLogout }: AdminLayoutProps) {
     const [activeSection, setActiveSection] = useState<Section>("dashboard");
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const isBackendOnline = useBackendStatus();
 
     return (
         <div className="flex h-full overflow-hidden">
@@ -106,15 +108,21 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#00ffaa] animate-pulse" />
+                        <div
+                            className={`w-2 h-2 rounded-full ${isBackendOnline
+                                ? "bg-[#00ffaa] animate-pulse"
+                                : "bg-red-500"
+                                }`}
+                        />
                         <span
-                            className="text-[#00ffaa]/60 hidden sm:inline"
+                            className={`${isBackendOnline ? "text-[#00ffaa]/60" : "text-red-400/80"
+                                } hidden sm:inline`}
                             style={{
                                 fontSize: "0.7rem",
                                 fontFamily: "monospace",
                             }}
                         >
-                            TRỰC TUYẾN
+                            {isBackendOnline ? "TRỰC TUYẾN" : "MẤT KẾT NỐI"}
                         </span>
                     </div>
                 </div>
