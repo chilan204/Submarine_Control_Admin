@@ -11,7 +11,7 @@ export function useBackendStatus() {
 
     const check = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/user`, {
+        const res = await fetch(`${BASE_URL}/api/auth/ping`, {
           method: "HEAD",
           signal: AbortSignal.timeout(5000),
         });
