@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Shield, Eye, EyeOff, User, Lock } from "lucide-react";
+import { ApiError, apiFetch, getErrorMessage } from "../lib/api";
 
 interface AdminLoginProps {
     onLogin: () => void;
@@ -22,13 +23,11 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         setLoading(true);
 
         try {
-            const response = await fetch(
-                "http://localhost:8080/api/auth/password-login",
+            const data = await apiFetch<any>(
+                "/api/auth/password-login",
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    authenticated: false,
                     body: JSON.stringify({
                         username: username.trim(),
                         password,
@@ -36,9 +35,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                 }
             );
 
-            const data = await response.json();
-
-            if (response.ok && data.data?.token) {
+            if (data.data?.token) {
                 if (data.data.roleCode === "ADMIN") {
                     sessionStorage.setItem(
                         "token",
@@ -72,10 +69,10 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             } else {
                 setError(msg || "Tên đăng nhập hoặc mật khẩu không đúng.");
             }
-        } catch {
-            setError(
-                "Lỗi kết nối mạng. Vui lòng thử lại."
-            );
+        } catch (error) {
+            setError(error instanceof ApiError && error.status === 401
+                ? "Tên đăng nhập hoặc mật khẩu không đúng."
+                : getErrorMessage(error, "Lỗi kết nối mạng. Vui lòng thử lại."));
         } finally {
             setLoading(false);
         }

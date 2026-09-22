@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../lib/api";
 
-const BASE_URL = "http://localhost:8080";
 const CHECK_INTERVAL = 10000;
 
 export function useBackendStatus() {
@@ -11,7 +11,7 @@ export function useBackendStatus() {
 
     const check = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/auth/ping`, {
+        const res = await fetch(`${API_BASE_URL}/api/auth/ping`, {
           method: "HEAD",
           signal: AbortSignal.timeout(5000),
         });

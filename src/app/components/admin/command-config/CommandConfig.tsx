@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { CommandCfg, CommandFormData } from "./types";
 import { CommandModal } from "./CommandModal";
+import { apiFetch, getErrorMessage } from "../../../lib/api";
 
 export function CommandConfig() {
     const [commands, setCommands] = useState<CommandCfg[]>([]);
@@ -13,12 +14,8 @@ export function CommandConfig() {
 
     const fetchCommands = async () => {
         try {
-            const token = sessionStorage.getItem("token");
-            const res = await fetch("http://localhost:8080/api/command-dictionaries", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (res.ok && data.data) {
+            const data = await apiFetch<any>("/api/command-dictionaries");
+            if (data.data) {
                 setCommands(data.data.map((c: any) => ({
                     id: c.id.toString(),
                     keyword: c.keyword,
@@ -44,84 +41,56 @@ export function CommandConfig() {
 
     const toggleEnabled = async (cmd: CommandCfg) => {
         try {
-            const token = sessionStorage.getItem("token");
-            const res = await fetch(`http://localhost:8080/api/command-dictionaries/${cmd.id}`, {
+            await apiFetch(`/api/command-dictionaries/${cmd.id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify({ ...cmd, active: !cmd.active })
             });
-            if (res.ok) {
-                toast.success("Cập nhật trạng thái thành công");
-                fetchCommands();
-            } else {
-                toast.error("Cập nhật trạng thái thất bại");
-            }
+            toast.success("Cập nhật trạng thái thành công");
+            fetchCommands();
         } catch (err) {
-            console.error(err);
-            toast.error("Đã xảy ra lỗi");
+            toast.error(getErrorMessage(err, "Cập nhật trạng thái thất bại"));
         }
     };
 
     const deleteCmd = async (id: string) => {
         try {
-            const token = sessionStorage.getItem("token");
-            const res = await fetch(`http://localhost:8080/api/command-dictionaries/${id}`, {
+            await apiFetch(`/api/command-dictionaries/${id}`, {
                 method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
             });
-            if (res.ok) {
-                toast.success("Xóa lệnh thành công");
-                fetchCommands();
-            } else {
-                toast.error("Xóa lệnh thất bại");
-            }
+            toast.success("Xóa lệnh thành công");
+            fetchCommands();
         } catch (err) {
-            console.error(err);
-            toast.error("Đã xảy ra lỗi");
+            toast.error(getErrorMessage(err, "Xóa lệnh thất bại"));
         }
     };
 
     const handleAdd = async (d: CommandFormData) => {
         try {
-            const token = sessionStorage.getItem("token");
-            const res = await fetch("http://localhost:8080/api/command-dictionaries", {
+            await apiFetch("/api/command-dictionaries", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify(d)
             });
-            if (res.ok) {
-                toast.success("Thêm lệnh thành công");
-                fetchCommands();
-                setModal(null);
-            } else {
-                toast.error("Thêm lệnh thất bại");
-            }
+            toast.success("Thêm lệnh thành công");
+            fetchCommands();
+            setModal(null);
         } catch (err) {
-            console.error(err);
-            toast.error("Đã xảy ra lỗi");
+            toast.error(getErrorMessage(err, "Thêm lệnh thất bại"));
         }
     };
 
     const handleEdit = async (d: CommandFormData) => {
         if (!selectedCmd) return;
         try {
-            const token = sessionStorage.getItem("token");
-            const res = await fetch(`http://localhost:8080/api/command-dictionaries/${selectedCmd.id}`, {
+            await apiFetch(`/api/command-dictionaries/${selectedCmd.id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify(d)
             });
-            if (res.ok) {
-                toast.success("Cập nhật lệnh thành công");
-                fetchCommands();
-                setModal(null);
-                setSelectedCmd(null);
-            } else {
-                toast.error("Cập nhật lệnh thất bại");
-            }
+            toast.success("Cập nhật lệnh thành công");
+            fetchCommands();
+            setModal(null);
+            setSelectedCmd(null);
         } catch (err) {
-            console.error(err);
-            toast.error("Đã xảy ra lỗi");
+            toast.error(getErrorMessage(err, "Cập nhật lệnh thất bại"));
         }
     };
 

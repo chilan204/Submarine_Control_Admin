@@ -13,10 +13,33 @@ export function UserModal({
     user ? { name: user.name, username: user.username, email: user.email, phone: user.phone || "", roleCode: user.roleCode, password: "" } : EMPTY_FORM
   );
   const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState("");
 
   const set = (k: keyof UserFormData, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const inputClass = "w-full bg-[#0d2040] border border-[#4488ff]/25 rounded-lg px-3 py-2 text-white placeholder-[#4466aa]/40 focus:outline-none focus:border-[#4488ff]/60 transition-colors";
+
+  const submit = () => {
+    const required = [form.name, form.username, form.email, form.phone, form.roleCode];
+    if (required.some((value) => !value.trim())) {
+      setError("Vui lòng nhập đầy đủ thông tin bắt buộc.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Email không hợp lệ.");
+      return;
+    }
+    if (!/^\+?[0-9]{8,15}$/.test(form.phone)) {
+      setError("Số điện thoại không hợp lệ.");
+      return;
+    }
+    if ((mode === "add" || form.password) && (form.password?.length ?? 0) < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự.");
+      return;
+    }
+    setError("");
+    onSave({ ...form, name: form.name.trim(), username: form.username.trim(), email: form.email.trim(), phone: form.phone.trim() });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -52,7 +75,7 @@ export function UserModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>EMAIL</label>
-              <input className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="xxx@xxx.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
+              <input type="email" className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="xxx@xxx.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
             </div>
             <div>
               <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>VAI TRÒ</label>
@@ -81,11 +104,13 @@ export function UserModal({
           </div>
         </div>
 
+        {error && <p className="mt-3 text-red-400 text-xs">{error}</p>}
+
         <div className="flex gap-3 mt-6">
           <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-[#8899aa]/20 text-[#8899aa] hover:border-[#8899aa]/40 transition-all" style={{ fontSize: "0.875rem" }}>
             Hủy
           </button>
-          <button onClick={() => onSave(form)} className="flex-1 py-2 rounded-xl bg-[#00ffaa] text-[#030d1a] hover:bg-[#00dd99] transition-all" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
+          <button onClick={submit} className="flex-1 py-2 rounded-xl bg-[#00ffaa] text-[#030d1a] hover:bg-[#00dd99] transition-all" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
             {mode === "add" ? "Thêm người dùng" : "Lưu thay đổi"}
           </button>
         </div>

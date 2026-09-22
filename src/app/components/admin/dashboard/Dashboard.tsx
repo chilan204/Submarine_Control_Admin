@@ -8,6 +8,15 @@ import { DashboardData } from "./types";
 import { timeAgo, getInitials, mapStatus } from "./utils";
 import { CHART_TOOLTIP_STYLE, statusCfg, roleBadge, DAYS_OF_WEEK } from "./constants";
 import { Card } from "./components/Card";
+import { apiFetch } from "../../../lib/api";
+
+function localDateKey(value: Date | string) {
+  const date = value instanceof Date ? value : new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export function Dashboard() {
   const [data, setData] = useState<DashboardData>({
@@ -24,18 +33,11 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = sessionStorage.getItem("token");
-        const headers = { "Authorization": `Bearer ${token}` };
-
-        const [usersRes, voicesRes, sessionsRes] = await Promise.all([
-          fetch("http://localhost:8080/api/user", { headers }),
-          fetch("http://localhost:8080/api/voice-samples", { headers }),
-          fetch("http://localhost:8080/api/user-session", { headers })
+        const [usersData, voicesData, sessionsData] = await Promise.all([
+          apiFetch<any>("/api/user"),
+          apiFetch<any>("/api/voice-samples"),
+          apiFetch<any>("/api/user-session")
         ]);
-
-        const usersData = await usersRes.json();
-        const voicesData = await voicesRes.json();
-        const sessionsData = await sessionsRes.json();
 
         const usersCount = usersData.data?.length || 0;
         const voiceSamplesCount = voicesData.data?.length || 0;
@@ -45,8 +47,8 @@ export function Dashboard() {
         sessions.sort((a: any, b: any) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
 
         // Commands today
-        const todayStr = new Date().toISOString().split("T")[0];
-        const sessionsToday = sessions.filter((s: any) => s.createdDate.startsWith(todayStr));
+        const todayStr = localDateKey(new Date());
+        const sessionsToday = sessions.filter((s: any) => localDateKey(s.createdDate) === todayStr);
         const commandsToday = sessionsToday.length;
 
         // Active users today
@@ -59,7 +61,7 @@ export function Dashboard() {
           const d = new Date();
           d.setDate(d.getDate() - i);
           const dayName = DAYS_OF_WEEK[d.getDay()];
-          const key = d.toISOString().split("T")[0];
+          const key = localDateKey(d);
           dailyMap.set(key, { day: dayName, total: 0, success: 0, failed: 0 });
         }
 
@@ -75,7 +77,7 @@ export function Dashboard() {
           else errorCount++;
 
           // Daily stats
-          const dateKey = s.createdDate.split("T")[0];
+          const dateKey = localDateKey(s.createdDate);
           if (dailyMap.has(dateKey)) {
             const stat = dailyMap.get(dateKey);
             stat.total++;

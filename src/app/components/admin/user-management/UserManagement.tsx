@@ -7,6 +7,9 @@ import { ROLE_LABELS, ROLE_COLORS } from "./constants";
 import { initials } from "./utils";
 import { UserModal } from "./UserModal";
 import { DeleteModal } from "./DeleteModal";
+import { apiFetch, getErrorMessage } from "../../../lib/api";
+
+interface ApiList<T> { data: T[] }
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,12 +20,8 @@ export function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch("http://localhost:8080/api/user", {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok && data.data) {
+      const data = await apiFetch<ApiList<any>>("/api/user");
+      if (data.data) {
         setUsers(data.data.map((u: any) => ({
           id: u.id.toString(),
           name: u.name,
@@ -50,72 +49,48 @@ export function UserManagement() {
 
   const handleAdd = async (data: UserFormData) => {
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch("http://localhost:8080/api/user", {
+      await apiFetch("/api/user", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(data)
       });
-      if (res.ok) {
-        toast.success("Thêm người dùng thành công");
-        fetchUsers();
-        setModal(null);
-      } else {
-        toast.error("Thêm người dùng thất bại");
-      }
+      toast.success("Thêm người dùng thành công");
+      fetchUsers();
+      setModal(null);
     } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi");
+      toast.error(getErrorMessage(err, "Thêm người dùng thất bại"));
     }
   };
 
   const handleEdit = async (data: UserFormData) => {
     if (!selectedUser) return;
     try {
-      const token = sessionStorage.getItem("token");
-      const payload = { ...data };
-      if (!payload.password) {
-        payload.password = "dummyPassword"; // dummy to pass validation
-      }
-
-      const res = await fetch(`http://localhost:8080/api/user/${selectedUser.id}`, {
+      const { password, ...fields } = data;
+      const payload = password?.trim() ? { ...fields, password } : fields;
+      await apiFetch(`/api/user/${selectedUser.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
-      if (res.ok) {
-        toast.success("Cập nhật người dùng thành công");
-        fetchUsers();
-        setModal(null);
-        setSelectedUser(null);
-      } else {
-        toast.error("Cập nhật người dùng thất bại");
-      }
+      toast.success("Cập nhật người dùng thành công");
+      fetchUsers();
+      setModal(null);
+      setSelectedUser(null);
     } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi");
+      toast.error(getErrorMessage(err, "Cập nhật người dùng thất bại"));
     }
   };
 
   const handleDelete = async () => {
     if (!selectedUser) return;
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch(`http://localhost:8080/api/user/${selectedUser.id}`, {
+      await apiFetch(`/api/user/${selectedUser.id}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
       });
-      if (res.ok) {
-        toast.success("Xóa người dùng thành công");
-        fetchUsers();
-        setModal(null);
-        setSelectedUser(null);
-      } else {
-        toast.error("Xóa người dùng thất bại");
-      }
+      toast.success("Xóa người dùng thành công");
+      fetchUsers();
+      setModal(null);
+      setSelectedUser(null);
     } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi");
+      toast.error(getErrorMessage(err, "Xóa người dùng thất bại"));
     }
   };
 

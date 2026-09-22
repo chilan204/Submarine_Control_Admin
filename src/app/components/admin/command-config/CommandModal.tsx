@@ -17,9 +17,19 @@ export function CommandModal({
     const [form, setForm] = useState<CommandFormData>(
         cmd ? { keyword: cmd.keyword, action: cmd.action, direction: cmd.direction || "", hasValue: cmd.hasValue, active: cmd.active } : EMPTY_FORM
     );
+    const [error, setError] = useState("");
     const set = <K extends keyof CommandFormData>(k: K, v: CommandFormData[K]) => setForm((f) => ({ ...f, [k]: v }));
 
     const inputClass = "w-full bg-[#0d2040] border border-[#4488ff]/25 rounded-lg px-3 py-2 text-white placeholder-[#4466aa]/40 focus:outline-none focus:border-[#4488ff]/60 transition-colors";
+
+    const submit = () => {
+        if (!form.keyword.trim() || !form.action.trim()) {
+            setError("Từ khóa và hành động không được để trống.");
+            return;
+        }
+        setError("");
+        onSave({ ...form, keyword: form.keyword.trim(), action: form.action.trim().toUpperCase(), direction: form.direction.trim().toUpperCase() });
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -62,9 +72,10 @@ export function CommandModal({
                         </div>
                     </div>
                 </div>
+                {error && <p className="mt-3 text-red-400 text-xs">{error}</p>}
                 <div className="flex gap-3 mt-6">
                     <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-[#8899aa]/20 text-[#8899aa] hover:border-[#8899aa]/40 transition-all" style={{ fontSize: "0.875rem" }}>Hủy</button>
-                    <button onClick={() => onSave(form)} className="flex-1 py-2 rounded-xl bg-[#00ffaa] text-[#030d1a] hover:bg-[#00dd99] transition-all" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
+                    <button onClick={submit} className="flex-1 py-2 rounded-xl bg-[#00ffaa] text-[#030d1a] hover:bg-[#00dd99] transition-all" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
                         {mode === "add" ? "Thêm lệnh" : "Lưu thay đổi"}
                     </button>
                 </div>

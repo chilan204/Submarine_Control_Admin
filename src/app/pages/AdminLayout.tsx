@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu } from "lucide-react";
 import { useBackendStatus } from "../hooks/useBackendStatus";
 
 import { Sidebar } from "../components/admin/Sidebar";
-import { Dashboard } from "../components/admin/dashboard/Dashboard";
-import { UserManagement } from "../components/admin/user-management/UserManagement";
-import { VoiceSampleManagement } from "../components/admin/voice-sample-management/VoiceSampleManagement";
-import { CommandConfig } from "../components/admin/command-config/CommandConfig";
-import { AdminCommandHistory } from "../components/admin/admin-command-history/AdminCommandHistory";
-import { RoleManagement } from "../components/admin/role-management/RoleManagement";
+
+const Dashboard = lazy(() => import("../components/admin/dashboard/Dashboard").then((module) => ({ default: module.Dashboard })));
+const UserManagement = lazy(() => import("../components/admin/user-management/UserManagement").then((module) => ({ default: module.UserManagement })));
+const VoiceSampleManagement = lazy(() => import("../components/admin/voice-sample-management/VoiceSampleManagement").then((module) => ({ default: module.VoiceSampleManagement })));
+const CommandConfig = lazy(() => import("../components/admin/command-config/CommandConfig").then((module) => ({ default: module.CommandConfig })));
+const AdminCommandHistory = lazy(() => import("../components/admin/admin-command-history/AdminCommandHistory").then((module) => ({ default: module.AdminCommandHistory })));
+const RoleManagement = lazy(() => import("../components/admin/role-management/RoleManagement").then((module) => ({ default: module.RoleManagement })));
 
 export type Section =
     | "dashboard"
@@ -137,9 +138,8 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
                             transition={{ duration: 0.2 }}
                             className="h-full"
                         >
-                            {activeSection === "dashboard" && (
-                                <Dashboard />
-                            )}
+                            <Suspense fallback={<div className="py-10 text-center text-[#8899aa]">Đang tải...</div>}>
+                            {activeSection === "dashboard" && <Dashboard />}
 
                             {activeSection === "users" && (
                                 <UserManagement />
@@ -160,6 +160,7 @@ export default function AdminLayout({ onLogout }: AdminLayoutProps) {
                             {activeSection === "history" && (
                                 <AdminCommandHistory />
                             )}
+                            </Suspense>
                         </motion.div>
                     </AnimatePresence>
                 </div>

@@ -13,10 +13,29 @@ export function UploadModal({
 }) {
   const [selectedUserId, setSelectedUserId] = useState(users[0]?.id || "");
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const inputClass =
     "w-full bg-[#0d2040] border border-[#4488ff]/25 rounded-lg px-3 py-2 text-white placeholder-[#4466aa]/40 focus:outline-none focus:border-[#4488ff]/60 transition-colors";
+
+  const selectFile = async (candidate?: File) => {
+    setFile(null);
+    setFileError("");
+    if (!candidate) return;
+    if (candidate.size > 10 * 1024 * 1024) {
+      setFileError("File WAV không được vượt quá 10 MB");
+      return;
+    }
+    const header = new TextDecoder("ascii").decode(
+      await candidate.slice(0, 12).arrayBuffer(),
+    );
+    if (header.slice(0, 4) !== "RIFF" || header.slice(8, 12) !== "WAVE") {
+      setFileError("File đã chọn không phải WAV hợp lệ");
+      return;
+    }
+    setFile(candidate);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -78,7 +97,7 @@ export function UploadModal({
                 type="file"
                 accept=".wav,audio/wav"
                 className="hidden"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => void selectFile(e.target.files?.[0])}
               />
               {file ? (
                 <div>
@@ -104,6 +123,7 @@ export function UploadModal({
                 </div>
               )}
             </div>
+            {fileError && <p className="mt-2 text-red-400 text-xs">{fileError}</p>}
           </div>
         </div>
         <div className="flex gap-3 mt-6">

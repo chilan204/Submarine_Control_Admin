@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { STAT_TABS, TABLE_HEADERS } from "./constants";
 import { FilterStatus, HistoryEntry } from "./types";
 import { HistoryRow } from "./HistoryRow";
+import { apiFetch } from "../../../lib/api";
 
 function mapHistory(item: any): HistoryEntry {
     const userName = item.user?.name || "Unknown";
@@ -45,20 +46,8 @@ export function AdminCommandHistory() {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const token = sessionStorage.getItem("token");
-
-                const res = await fetch(
-                    "http://localhost:8080/api/user-session",
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                const json = await res.json();
-
-                if (res.ok && json.data) {
+                const json = await apiFetch<any>("/api/user-session");
+                if (json.data) {
                     const mapped = json.data
                         .map(mapHistory)
                         .sort(

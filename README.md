@@ -1,9 +1,16 @@
 
-  # Submarine Control App
+# Submarine Control Admin
 
-  ## Running the code
+## Configuration
 
-  Run `npm i` to install the dependencies.
+Copy `.env.example` to `.env` and configure the backend URL:
 
-  Run `npm run dev` to start the development server.
-  
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+Production deployments must use an HTTPS URL.
+
+## Running the code
+
+Run `npm install`, then `npm run dev`. Use `npm run build` for a production build.

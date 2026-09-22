@@ -4,6 +4,7 @@ import { Search, Trash2, Upload, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { VoiceSampleItem } from "./types";
 import { UploadModal } from "./UploadModal";
+import { apiFetch, getErrorMessage } from "../../../lib/api";
 
 function formatDuration(s: number | null) {
   if (s == null) return "—";
@@ -18,12 +19,8 @@ export function VoiceSampleManagement() {
 
   const fetchSamples = async () => {
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch("http://localhost:8080/api/voice-samples", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      if (res.ok && json.data) {
+      const json = await apiFetch<any>("/api/voice-samples");
+      if (json.data) {
         setSamples(
           json.data.map((item: any) => {
             const userName = item.userName || `User #${item.userId}`;
@@ -54,12 +51,8 @@ export function VoiceSampleManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch("http://localhost:8080/api/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json();
-      if (res.ok && json.data) {
+      const json = await apiFetch<any>("/api/user");
+      if (json.data) {
         setUsers(
           json.data.map((u: any) => ({ id: u.id.toString(), name: u.name }))
         );
@@ -82,71 +75,42 @@ export function VoiceSampleManagement() {
 
   const deleteSample = async (userId: string) => {
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:8080/api/voice-samples/${userId}`,
-        {
+      await apiFetch(`/api/voice-samples/${userId}`, {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (res.ok) {
-        toast.success("Xóa mẫu giọng nói thành công");
-        fetchSamples();
-      } else {
-        toast.error("Xóa mẫu giọng nói thất bại");
-      }
+      });
+      toast.success("Xóa mẫu giọng nói thành công");
+      fetchSamples();
     } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi");
+      toast.error(getErrorMessage(err, "Xóa mẫu giọng nói thất bại"));
     }
   };
 
   const handleUpload = async (userId: string, file: File) => {
     try {
-      const token = sessionStorage.getItem("token");
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch(
-        `http://localhost:8080/api/voice-samples/${userId}`,
-        {
+      await apiFetch(`/api/voice-samples/${userId}`, {
           method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
           body: formData,
-        }
-      );
-      if (res.ok) {
-        toast.success("Tải lên mẫu giọng nói thành công");
-        fetchSamples();
-        setShowUpload(false);
-      } else {
-        toast.error("Tải lên mẫu giọng nói thất bại");
-      }
+          timeoutMs: 60_000,
+      });
+      toast.success("Tải lên mẫu giọng nói thành công");
+      fetchSamples();
+      setShowUpload(false);
     } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi");
+      toast.error(getErrorMessage(err, "Tải lên mẫu giọng nói thất bại"));
     }
   };
 
   const toggleActive = async (userId: string) => {
     try {
-      const token = sessionStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:8080/api/voice-samples/${userId}/toggle-active`,
-        {
+      await apiFetch(`/api/voice-samples/${userId}/toggle-active`, {
           method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (res.ok) {
-        toast.success("Cập nhật trạng thái thành công");
-        fetchSamples();
-      } else {
-        toast.error("Cập nhật trạng thái thất bại");
-      }
+      });
+      toast.success("Cập nhật trạng thái thành công");
+      fetchSamples();
     } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi");
+      toast.error(getErrorMessage(err, "Cập nhật trạng thái thất bại"));
     }
   };
 

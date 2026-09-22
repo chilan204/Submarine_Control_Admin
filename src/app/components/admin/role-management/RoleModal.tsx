@@ -11,10 +11,24 @@ export function RoleModal({
   const [form, setForm] = useState<RoleFormData>(
     role ? { code: role.code, priority: role.priority } : EMPTY_FORM
   );
+  const [error, setError] = useState("");
 
   const set = (k: keyof RoleFormData, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
   const inputClass = "w-full bg-[#0d2040] border border-[#4488ff]/25 rounded-lg px-3 py-2 text-white placeholder-[#4466aa]/40 focus:outline-none focus:border-[#4488ff]/60 transition-colors";
+
+  const submit = () => {
+    if (!/^[A-Z][A-Z0-9_]*$/.test(form.code.trim())) {
+      setError("Mã vai trò chỉ gồm chữ in hoa, số và dấu gạch dưới.");
+      return;
+    }
+    if (!Number.isInteger(form.priority) || form.priority < 0) {
+      setError("Mức ưu tiên phải là số nguyên không âm.");
+      return;
+    }
+    setError("");
+    onSave({ code: form.code.trim(), priority: form.priority });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -43,11 +57,13 @@ export function RoleModal({
           </div>
         </div>
 
+        {error && <p className="mt-3 text-red-400 text-xs">{error}</p>}
+
         <div className="flex gap-3 mt-6">
           <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-[#8899aa]/20 text-[#8899aa] hover:border-[#8899aa]/40 transition-all" style={{ fontSize: "0.875rem" }}>
             Hủy
           </button>
-          <button onClick={() => onSave(form)} className="flex-1 py-2 rounded-xl bg-[#00ffaa] text-[#030d1a] hover:bg-[#00dd99] transition-all" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
+          <button onClick={submit} className="flex-1 py-2 rounded-xl bg-[#00ffaa] text-[#030d1a] hover:bg-[#00dd99] transition-all" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
             {mode === "add" ? "Thêm vai trò" : "Lưu thay đổi"}
           </button>
         </div>
