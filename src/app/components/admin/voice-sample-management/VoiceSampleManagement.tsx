@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Trash2, Upload, Mic } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,15 @@ export function VoiceSampleManagement() {
   const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
   const [search, setSearch] = useState("");
   const [showUpload, setShowUpload] = useState(false);
+  const pending = useRef(new Set<string>());
+  const [busyUsers, setBusyUsers] = useState(new Set<string>());
+  const reportSaved = (result: any, message: string) => {
+    if (result.data?.cacheSynced === false) {
+      toast.warning("Đã lưu thay đổi. AI chưa đồng bộ; hệ thống sẽ tự thử lại.");
+    } else {
+      toast.success(message);
+    }
+  };
 
   const fetchSamples = async () => {
     try {
@@ -75,10 +84,10 @@ export function VoiceSampleManagement() {
 
   const deleteSample = async (userId: string) => {
     try {
-      await apiFetch(`/api/voice-samples/${userId}`, {
+      const result = await apiFetch(`/api/voice-samples/${userId}`, {
           method: "DELETE",
       });
-      toast.success("Xóa mẫu giọng nói thành công");
+      reportSaved(result, "Xóa mẫu giọng nói thành công");
       fetchSamples();
     } catch (err) {
       toast.error(getErrorMessage(err, "Xóa mẫu giọng nói thất bại"));
@@ -89,12 +98,12 @@ export function VoiceSampleManagement() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      await apiFetch(`/api/voice-samples/${userId}`, {
+      const result = await apiFetch(`/api/voice-samples/${userId}`, {
           method: "PUT",
           body: formData,
           timeoutMs: 60_000,
       });
-      toast.success("Tải lên mẫu giọng nói thành công");
+      reportSaved(result, "Tải lên mẫu giọng nói thành công");
       fetchSamples();
       setShowUpload(false);
     } catch (err) {
@@ -102,15 +111,23 @@ export function VoiceSampleManagement() {
     }
   };
 
-  const toggleActive = async (userId: string) => {
+  const setActive = async (userId: string, active: boolean) => {
+    if (pending.current.has(userId)) return;
+    pending.current.add(userId);
+    setBusyUsers(new Set(pending.current));
     try {
-      await apiFetch(`/api/voice-samples/${userId}/toggle-active`, {
+      const result = await apiFetch(`/api/voice-samples/${userId}/active`, {
           method: "PATCH",
+          body: JSON.stringify({ active }),
       });
-      toast.success("Cập nhật trạng thái thành công");
-      fetchSamples();
+      setSamples(items => items.map(item => item.userId === userId ? { ...item, active } : item));
+      reportSaved(result, "Cập nhật trạng thái thành công");
     } catch (err) {
       toast.error(getErrorMessage(err, "Cập nhật trạng thái thất bại"));
+    } finally {
+      await fetchSamples();
+      pending.current.delete(userId);
+      setBusyUsers(new Set(pending.current));
     }
   };
 
@@ -256,7 +273,7 @@ export function VoiceSampleManagement() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleActive(s.userId)}
+                      <button disabled={busyUsers.has(s.userId)} onClick={() => setActive(s.userId, !s.active)}
                         className={`w-11 h-6 rounded-full border transition-all relative flex-shrink-0 ${s.active ? "bg-[#00ffaa]/15 border-[#00ffaa]/40" : "bg-[#0d2040] border-[#8899aa]/25"}`}>
                         <span className={`absolute top-1 w-4 h-4 rounded-full transition-all ${s.active ? "left-6 bg-[#00ffaa]" : "left-1 bg-[#8899aa]"}`} />
                       </button>

@@ -27,7 +27,9 @@ function mapHistory(item: any): HistoryEntry {
         userInitials: initials,
         userRole: item.user?.roleCode || "UNKNOWN",
         command: item.transcript || item.action || "Unknown command",
-        status: item.executed && item.commandStatus === "EXECUTED" ? "success" : "error",
+        status: item.commandStatus === "SENT_UNCONFIRMED"
+            ? "warning"
+            : item.executed && item.commandStatus === "EXECUTED" ? "success" : "error",
         response,
         timestamp: new Date(item.createdDate),
     };
@@ -95,6 +97,7 @@ export function AdminCommandHistory() {
         () => ({
             all: history.length,
             success: history.filter((h) => h.status === "success").length,
+            warning: history.filter((h) => h.status === "warning").length,
             error: history.filter((h) => h.status === "error").length,
         }),
         [history]
@@ -110,7 +113,7 @@ export function AdminCommandHistory() {
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {STAT_TABS.map(({ key, label, color }) => (
                     <button
                         key={key}

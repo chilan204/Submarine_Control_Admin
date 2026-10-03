@@ -6,6 +6,15 @@ import { CommandCfg, CommandFormData } from "./types";
 import { CommandModal } from "./CommandModal";
 import { apiFetch, getErrorMessage } from "../../../lib/api";
 
+interface MutationResponse {
+    data: { saved: boolean; cacheSynced: boolean };
+}
+
+function notifySaved(response: MutationResponse, message: string) {
+    if (response.data.cacheSynced) toast.success(message);
+    else toast.warning("Đã lưu thay đổi. AI chưa đồng bộ từ điển lệnh; hệ thống sẽ tự thử lại. Không cần lưu lại.");
+}
+
 export function CommandConfig() {
     const [commands, setCommands] = useState<CommandCfg[]>([]);
     const [search, setSearch] = useState("");
@@ -41,11 +50,11 @@ export function CommandConfig() {
 
     const toggleEnabled = async (cmd: CommandCfg) => {
         try {
-            await apiFetch(`/api/command-dictionaries/${cmd.id}`, {
+            const response = await apiFetch<MutationResponse>(`/api/command-dictionaries/${cmd.id}`, {
                 method: "PUT",
                 body: JSON.stringify({ ...cmd, active: !cmd.active })
             });
-            toast.success("Cập nhật trạng thái thành công");
+            notifySaved(response, "Cập nhật trạng thái thành công");
             fetchCommands();
         } catch (err) {
             toast.error(getErrorMessage(err, "Cập nhật trạng thái thất bại"));
@@ -54,10 +63,10 @@ export function CommandConfig() {
 
     const deleteCmd = async (id: string) => {
         try {
-            await apiFetch(`/api/command-dictionaries/${id}`, {
+            const response = await apiFetch<MutationResponse>(`/api/command-dictionaries/${id}`, {
                 method: "DELETE",
             });
-            toast.success("Xóa lệnh thành công");
+            notifySaved(response, "Xóa lệnh thành công");
             fetchCommands();
         } catch (err) {
             toast.error(getErrorMessage(err, "Xóa lệnh thất bại"));
@@ -66,11 +75,11 @@ export function CommandConfig() {
 
     const handleAdd = async (d: CommandFormData) => {
         try {
-            await apiFetch("/api/command-dictionaries", {
+            const response = await apiFetch<MutationResponse>("/api/command-dictionaries", {
                 method: "POST",
                 body: JSON.stringify(d)
             });
-            toast.success("Thêm lệnh thành công");
+            notifySaved(response, "Thêm lệnh thành công");
             fetchCommands();
             setModal(null);
         } catch (err) {
@@ -81,11 +90,11 @@ export function CommandConfig() {
     const handleEdit = async (d: CommandFormData) => {
         if (!selectedCmd) return;
         try {
-            await apiFetch(`/api/command-dictionaries/${selectedCmd.id}`, {
+            const response = await apiFetch<MutationResponse>(`/api/command-dictionaries/${selectedCmd.id}`, {
                 method: "PUT",
                 body: JSON.stringify(d)
             });
-            toast.success("Cập nhật lệnh thành công");
+            notifySaved(response, "Cập nhật lệnh thành công");
             fetchCommands();
             setModal(null);
             setSelectedCmd(null);

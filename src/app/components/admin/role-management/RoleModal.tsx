@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { Role, RoleFormData } from "./types";
+import { isSystemRole } from "./systemRoles";
 
 const EMPTY_FORM: RoleFormData = { code: "", priority: 1 };
 
@@ -49,11 +50,13 @@ export function RoleModal({
         <div className="space-y-4">
           <div>
             <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>MÃ VAI TRÒ (CODE)</label>
-            <input className={inputClass} style={{ fontSize: "0.875rem", fontFamily: "monospace", textTransform: "uppercase" }} placeholder="VD: ADMIN, OFFICER_1" value={form.code} onChange={(e) => set("code", e.target.value.toUpperCase())} />
+            <input disabled={mode === "edit" && !!role && isSystemRole(role.code)} className={inputClass} style={{ fontSize: "0.875rem", fontFamily: "monospace", textTransform: "uppercase" }} placeholder="VD: ADMIN, OFFICER_1" value={form.code} onChange={(e) => set("code", e.target.value.toUpperCase())} />
+            {mode === "edit" && role && isSystemRole(role.code) && <p className="mt-2 text-xs text-[#8899aa]">Mã vai trò hệ thống không thể thay đổi.</p>}
           </div>
           <div>
             <label className="block text-[#8899aa] mb-1" style={{ fontSize: "0.72rem", letterSpacing: "0.1em" }}>MỨC ĐỘ ƯU TIÊN</label>
             <input type="number" min="0" className={inputClass} style={{ fontSize: "0.875rem" }} placeholder="1" value={form.priority} onChange={(e) => set("priority", parseInt(e.target.value) || 0)} />
+            <p className="mt-2 text-xs text-[#8899aa]">Số càng lớn, quyền ưu tiên phân xử lệnh càng cao.</p>
           </div>
         </div>
 

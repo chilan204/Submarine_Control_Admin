@@ -6,6 +6,8 @@ import { Role, RoleFormData } from "./types";
 import { RoleModal } from "./RoleModal";
 import { DeleteModal } from "./DeleteModal";
 import { apiFetch, getErrorMessage } from "../../../lib/api";
+import { isSystemRole } from "./systemRoles";
+import { countHighestPriorityRoles } from "./priority";
 
 export function RoleManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -85,7 +87,7 @@ export function RoleManagement() {
       <div className="grid grid-cols-2 gap-3">
         {[
           { label: "Tổng số vai trò", count: roles.length, color: "#8899aa" },
-          { label: "Mức độ ưu tiên cao nhất", count: roles.filter(r => r.priority === 1).length, color: "#00ffaa" },
+          { label: "Số vai trò có ưu tiên cao nhất", count: countHighestPriorityRoles(roles), color: "#00ffaa" },
         ].map((s) => (
           <div key={s.label} className="bg-[#0a1628]/75 border border-[#00ffaa]/10 rounded-xl p-3 text-center backdrop-blur-md">
             <div style={{ color: s.color, fontSize: "1.4rem", fontWeight: 700, fontFamily: "monospace" }}>{s.count}</div>
@@ -142,8 +144,8 @@ export function RoleManagement() {
                           className="p-1.5 rounded-lg border border-[#4488ff]/20 text-[#4488ff]/70 hover:bg-[#4488ff]/10 hover:text-[#4488ff] transition-all">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => { setSelectedRole(role); setModal("delete"); }}
-                          className="p-1.5 rounded-lg border border-red-400/20 text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all">
+                        <button disabled={isSystemRole(role.code)} title={isSystemRole(role.code) ? "Không thể xóa vai trò hệ thống" : "Xóa vai trò"} onClick={() => { setSelectedRole(role); setModal("delete"); }}
+                          className="p-1.5 rounded-lg border border-red-400/20 text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, CircleAlert, XCircle } from "lucide-react";
 import { CmdStatus } from "./types";
 
 export const TABLE_HEADERS = [
@@ -25,6 +25,12 @@ export const STATUS_CFG: Record<
         label: "Thành công",
         rowBg: "",
     },
+    warning: {
+        icon: <CircleAlert className="w-3.5 h-3.5" />,
+        color: "#fbbf24",
+        label: "Đã gửi, chưa xác nhận AUV",
+        rowBg: "bg-amber-400/2",
+    },
     error: {
         icon: <XCircle className="w-3.5 h-3.5" />,
         color: "#ff4444",
@@ -43,11 +49,12 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const STAT_TABS: {
-    key: "all" | "success" | "error";
+    key: "all" | "success" | "warning" | "error";
     label: string;
     color: string;
 }[] = [
         { key: "all", label: "Tất cả", color: "#8899aa" },
         { key: "success", label: "Thành công", color: "#00ffaa" },
+        { key: "warning", label: "Chưa xác nhận AUV", color: "#fbbf24" },
         { key: "error", label: "Lỗi", color: "#ff4444" },
     ];

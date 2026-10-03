@@ -15,6 +15,7 @@ export function getInitials(name: string) {
 
 export function mapStatus(status: string) {
   if (status === "EXECUTED") return "success";
+  if (status === "SENT_UNCONFIRMED") return "warning";
   if (status && (status.includes("REJECTED") || status.includes("DENIED") || status.includes("CONFLICT"))) return "warning";
   return "error";
 }

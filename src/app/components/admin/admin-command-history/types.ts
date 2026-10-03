@@ -1,4 +1,4 @@
-export type CmdStatus = "success" | "error";
+export type CmdStatus = "success" | "warning" | "error";
 
 export interface HistoryEntry {
     id: string;
@@ -12,4 +12,4 @@ export interface HistoryEntry {
     timestamp: Date;
 }
 
-export type FilterStatus = "all" | "success" | "error";
+export type FilterStatus = "all" | "success" | "warning" | "error";

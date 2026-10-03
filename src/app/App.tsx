@@ -24,9 +24,9 @@ export default function App() {
         const user = JSON.parse(storedUser);
         if (user.roleCode !== "ADMIN") throw new Error("Not an admin");
         await apiFetch("/api/user");
-        setIsLoggedIn(true);
+        if (sessionStorage.getItem("token") === token) setIsLoggedIn(true);
       } catch {
-        expireSession();
+        expireSession(token);
       }
     };
 
@@ -38,8 +38,15 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
-  const handleLogout = () => {
-    expireSession();
+  const handleLogout = async () => {
+    const token = sessionStorage.getItem("token");
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST", timeoutMs: 3000 });
+    } catch {
+      // Clear the local session even if the server is unreachable.
+    } finally {
+      expireSession(token);
+    }
   };
 
   if (isLoggedIn === null) {
