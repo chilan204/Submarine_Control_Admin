@@ -13,13 +13,13 @@ export function DeleteModal({ user, onConfirm, onClose }: { user: User; onConfir
             <Trash2 className="w-6 h-6 text-red-400" />
           </div>
         </div>
-        <h3 className="text-white text-center mb-1" style={{ fontSize: "1rem", fontWeight: 600 }}>Xóa Người Dùng</h3>
+        <h3 className="text-white text-center mb-1" style={{ fontSize: "1rem", fontWeight: 600 }}>Vô hiệu hóa tài khoản</h3>
         <p className="text-[#8899aa] text-center mb-5" style={{ fontSize: "0.85rem" }}>
-          Bạn có chắc chắn muốn xóa <span className="text-white">{user.name}</span>? Hành động này không thể hoàn tác.
+          Vô hiệu hóa <span className="text-white">{user.name}</span>? Tài khoản sẽ không thể đăng nhập hoặc điều khiển AUV. Lịch sử điều khiển được giữ lại.
         </p>
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-[#8899aa]/20 text-[#8899aa] hover:border-[#8899aa]/40 transition-all" style={{ fontSize: "0.875rem" }}>Hủy</button>
-          <button onClick={onConfirm} className="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white transition-all" style={{ fontSize: "0.875rem", fontWeight: 600 }}>Xóa</button>
+          <button onClick={onConfirm} className="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white transition-all" style={{ fontSize: "0.875rem", fontWeight: 600 }}>Vô hiệu hóa</button>
         </div>
       </motion.div>
     </div>

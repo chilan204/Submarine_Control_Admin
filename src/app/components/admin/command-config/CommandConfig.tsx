@@ -4,7 +4,7 @@ import { Plus, Edit2, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { CommandCfg, CommandFormData } from "./types";
 import { CommandModal } from "./CommandModal";
-import { apiFetch, getErrorMessage } from "../../../lib/api";
+import { apiFetch, ApiError, getErrorMessage } from "../../../lib/api";
 
 interface MutationResponse {
     data: { saved: boolean; cacheSynced: boolean };
@@ -23,9 +23,10 @@ export function CommandConfig() {
 
     const fetchCommands = async () => {
         try {
-            const data = await apiFetch<any>("/api/command-dictionaries");
+            const data = await apiFetch<{ data: (Omit<CommandCfg, "id"> & { id: number })[] }>("/api/command-dictionaries");
             if (data.data) {
-                setCommands(data.data.map((c: any) => ({
+                setCommands(data.data.map((c) => ({
+                    version: c.version,
                     id: c.id.toString(),
                     keyword: c.keyword,
                     action: c.action,
@@ -50,9 +51,9 @@ export function CommandConfig() {
 
     const toggleEnabled = async (cmd: CommandCfg) => {
         try {
-            const response = await apiFetch<MutationResponse>(`/api/command-dictionaries/${cmd.id}`, {
-                method: "PUT",
-                body: JSON.stringify({ ...cmd, active: !cmd.active })
+            const response = await apiFetch<MutationResponse>(`/api/command-dictionaries/${cmd.id}/active`, {
+                method: "PATCH",
+                body: JSON.stringify({ active: !cmd.active })
             });
             notifySaved(response, "Cập nhật trạng thái thành công");
             fetchCommands();
@@ -92,13 +93,18 @@ export function CommandConfig() {
         try {
             const response = await apiFetch<MutationResponse>(`/api/command-dictionaries/${selectedCmd.id}`, {
                 method: "PUT",
-                body: JSON.stringify(d)
+                body: JSON.stringify({ ...d, version: selectedCmd.version })
             });
             notifySaved(response, "Cập nhật lệnh thành công");
             fetchCommands();
             setModal(null);
             setSelectedCmd(null);
         } catch (err) {
+            if (err instanceof ApiError && err.status === 409) {
+                toast.error("Lệnh đã thay đổi. Hãy đóng biểu mẫu và mở lại từ danh sách mới.");
+                await fetchCommands();
+                return;
+            }
             toast.error(getErrorMessage(err, "Cập nhật lệnh thất bại"));
         }
     };

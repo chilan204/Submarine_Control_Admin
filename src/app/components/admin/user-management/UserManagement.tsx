@@ -7,9 +7,11 @@ import { ROLE_LABELS, ROLE_COLORS } from "./constants";
 import { initials } from "./utils";
 import { UserModal } from "./UserModal";
 import { DeleteModal } from "./DeleteModal";
-import { apiFetch, getErrorMessage } from "../../../lib/api";
+import { ApiError, apiFetch, getErrorMessage } from "../../../lib/api";
+import { buildUserUpdate } from "./user-update";
 
 interface ApiList<T> { data: T[] }
+type ApiUser = Omit<User, "id"> & { id: number };
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -20,10 +22,11 @@ export function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const data = await apiFetch<ApiList<any>>("/api/user");
+      const data = await apiFetch<ApiList<ApiUser>>("/api/user");
       if (data.data) {
-        setUsers(data.data.map((u: any) => ({
+        setUsers(data.data.map((u) => ({
           id: u.id.toString(),
+          version: u.version,
           name: u.name,
           username: u.username,
           email: u.email,
@@ -64,8 +67,7 @@ export function UserManagement() {
   const handleEdit = async (data: UserFormData) => {
     if (!selectedUser) return;
     try {
-      const { password, ...fields } = data;
-      const payload = password?.trim() ? { ...fields, password } : fields;
+      const payload = buildUserUpdate(selectedUser, data);
       await apiFetch(`/api/user/${selectedUser.id}`, {
         method: "PUT",
         body: JSON.stringify(payload)
@@ -75,6 +77,13 @@ export function UserManagement() {
       setModal(null);
       setSelectedUser(null);
     } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setModal(null);
+        setSelectedUser(null);
+        await fetchUsers();
+        toast.error(`${getErrorMessage(err, "Không thể cập nhật tài khoản")}. Hãy mở lại biểu mẫu từ danh sách mới.`);
+        return;
+      }
       toast.error(getErrorMessage(err, "Cập nhật người dùng thất bại"));
     }
   };
@@ -85,12 +94,12 @@ export function UserManagement() {
       await apiFetch(`/api/user/${selectedUser.id}`, {
         method: "DELETE",
       });
-      toast.success("Xóa người dùng thành công");
+      toast.success("Đã vô hiệu hóa tài khoản, lịch sử điều khiển được giữ lại");
       fetchUsers();
       setModal(null);
       setSelectedUser(null);
     } catch (err) {
-      toast.error(getErrorMessage(err, "Xóa người dùng thất bại"));
+      toast.error(getErrorMessage(err, "Vô hiệu hóa tài khoản thất bại"));
     }
   };
 
@@ -179,6 +188,7 @@ export function UserManagement() {
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => { setSelectedUser(user); setModal("delete"); }}
+                            aria-label={`Vô hiệu hóa ${user.username}`}
                             className="p-1.5 rounded-lg border border-red-400/20 text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

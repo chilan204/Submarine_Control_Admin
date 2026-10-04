@@ -1,4 +1,5 @@
 export interface CommandCfg {
+    version: number;
     id: string;
     keyword: string;
     action: string;
